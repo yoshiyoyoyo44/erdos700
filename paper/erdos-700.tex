@@ -1,0 +1,613 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage[a4paper,hmargin=32mm,top=26mm,bottom=27mm]{geometry}
+\usepackage[unicode,hidelinks]{hyperref}
+\hypersetup{
+  pdftitle={Equality in a binomial gcd bound of Erdős and Szekeres},
+  pdfauthor={Yoshiharu Onishi},
+  pdfsubject={Binomial coefficients, prime-power divisors and equality in Erdős Problem 700(a)},
+  pdfkeywords={binomial coefficients, Kummer's theorem, digit sums, Lean},
+  pdflang={en}
+}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newcommand{\colg}[2]{g_{#1}(#2)}
+\newcommand{\crit}{\mathcal D}
+\newcommand{\ds}{\operatorname{s}}
+\newcommand{\ord}{\operatorname{ord}}
+\newcommand{\lcm}{\operatorname{lcm}}
+\newcommand{\leanname}[1]{{\small\texttt{\detokenize{#1}}}}
+\setcounter{tocdepth}{2}
+\setlength{\emergencystretch}{1em}
+\setlength{\belowcaptionskip}{5pt}
+\renewcommand{\arraystretch}{1.12}
+\linespread{1.045}
+\clubpenalty=8500
+\widowpenalty=8500
+\raggedbottom
+
+\title{\bfseries Equality in a binomial gcd bound\\of Erd\H{o}s and Szekeres}
+\author{Yoshiharu Onishi}
+\date{November 20, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+For a composite integer \(n\), let \(f(n)\) be the minimum of
+\(\gcd(n,\binom nk)\) over \(2\le k\le n/2\). Erd\H{o}s and Szekeres asked
+which \(n\) satisfy \(f(n)=n/Q(n)\), where \(Q(n)\) is the largest prime
+power dividing \(n\). We give a necessary and sufficient condition using
+intersections of subset sums obtained by splitting the prime-power terms in
+the base expansions of \(n\). It also determines equality when the
+denominator is the largest prime factor. For each fixed \(m\ge2\), equality
+\(f(mp)=m\) has relative density one among primes \(p>m\). For every prime
+\(q\nmid m\), the exponents \(e\) with \(f(mq^e)=m\) have density one.
+Both exceptional sets satisfy power-saving bounds. We give exact formulas
+for several families, including one in which the exceptions correspond to
+powers of two that omit the ternary digit \(2\). The main theorems have
+been formalized in Lean~4.
+\end{abstract}
+
+\section{The two equality questions}\label{sec:intro}
+
+For a composite integer \(n\ge4\), write
+\begin{equation}\label{eq:definition}
+  \colg nk=\gcd\!\left(n,\binom nk\right),\qquad
+  f(n)=\min_{2\le k\le\lfloor n/2\rfloor}\colg nk .
+\end{equation}
+The largest prime factor \(P(n)\) and the largest prime-power divisor
+\(Q(n)\) are given by
+\[
+  P(n)=\max_{p\mid n}p,\qquad Q(n)=\max_{p\mid n}p^{v_p(n)}.
+\]
+In both maxima \(p\) runs over primes, and \(v_p\) is the \(p\)-adic
+valuation. Erd\H{o}s and Szekeres asked for the composite integers with
+\(f(n)=n/Q(n)\) \cite[pp.~98--99]{ES}. Problem~700(a) in Bloom's collection
+uses \(P(n)\) \cite{Bloom}. For \(n=12\) the five gcds, in increasing order
+of \(k\), are \(6,4,3,12,12\). Thus \(f(12)=3=12/Q(12)\), whereas
+\(12/P(12)=4\). The discussion accompanying Problem~700 also describes
+digit conditions for the family \(n=q(q+1)\) with \(q\) prime \cite{Bloom}.
+
+Theorem~\ref{thm:criterion} gives a finite test for both equalities from
+the prime factorization and the digits of \(n\). The argument also gives a
+column witnessing strict inequality whenever an intersection contains an
+interior point. Sections~\ref{sec:primes} and~\ref{sec:powers} use carries in
+base expansions to count exceptions with fixed cofactor. Explicit
+families in Section~\ref{sec:families} show how the exceptional set can
+be described exactly. For instance, when \(p>8\) is prime, \(f(8p)=4\)
+precisely when \(p-1\) or \(3p-1\) is a power of two. The present
+characterization concerns part~(a). Parts~(b) and~(c) ask, respectively,
+whether \(f(n)>\sqrt n\) occurs infinitely often and how large \(f(n)\)
+can be relative to \(n/(\log n)^\alpha\).
+
+\section{A criterion for every composite integer}\label{sec:criterion}
+
+Fix \(n\), and abbreviate \(P=P(n)\) and \(Q=Q(n)\). For \(d>1\), let
+\(s(d)\) be its smallest prime factor. Use the divisors
+\begin{equation}\label{eq:critical}
+  \crit(n)=\{d\mid n:\ d>Q,\ d/s(d)\le Q\}.
+\end{equation}
+Given a prime \(p\mid n\), write \(n=\sum_j n_jp^j\), with
+\(0\le n_j<p\). Start with \(n_j\) copies of each \(p^j\). One
+\emph{split} replaces a single \(p^j\), \(j\ge1\), by \(p\) copies of
+\(p^{j-1}\). For \(1\le b\le v_p(n)\), let \(S_{p,b}(n)\) be the set of
+all subset sums of the resulting multiset, allowing any sequence of at most
+\(v_p(n)-b\) splits. The empty and full sums give \(0,n\in S_{p,b}(n)\).
+For \(d>1\) dividing \(n\), write
+\[
+  I_d(n)=\bigcap_{p^b\parallel d}S_{p,b}(n),
+\]
+where \(p^b\parallel d\) ranges over the exact prime powers of \(d\), with
+\(b\ge1\).
+
+\begin{theorem}\label{thm:criterion}
+Suppose \(n\) has at least two distinct prime factors. Then
+\begin{align}
+ f(n)=n/Q &\ \Longleftrightarrow\
+      I_d(n)=\{0,n\}\quad\text{for every }d\in\crit(n),\label{eq:Q}\\
+ f(n)=n/P &\ \Longleftrightarrow\
+      P=Q\ \text{ and }\ I_d(n)=\{0,n\}\quad\text{for every }d\in\crit(n).
+      \label{eq:P}
+\end{align}
+For \(n=p^a\) with \(a\ge2\), one has \(f(n)=p\). Among prime powers the
+first equality has no solutions, and the second holds precisely for \(a=2\).
+\end{theorem}
+
+\begin{lemma}\label{lem:splits}
+For \(0\le k\le n\), the least number of splits required to realize \(k\)
+as a subset sum in base \(p\) is \(v_p\binom nk\).
+\end{lemma}
+
+\begin{proof}
+Write \(\ds_p(x)\) for the sum of the base-\(p\) digits of \(x\). The
+canonical expansion uses \(\ds_p(n)\) terms. Each split adds \(p-1\) terms.
+If a submultiset has sum \(k\), it contains at least \(\ds_p(k)\) terms,
+since combining \(p\) equal powers into the next power reduces the count
+until the canonical expansion is reached. Its complement similarly needs
+at least \(\ds_p(n-k)\) terms. Conversely, combine the canonical expansions
+of \(k\) and \(n-k\) and perform such carries until their union is the
+canonical expansion of \(n\). Reversing those carries attains the lower
+bound. The least number of splits is therefore
+\begin{equation}\label{eq:kummer}
+ \frac{\ds_p(k)+\ds_p(n-k)-\ds_p(n)}{p-1}=v_p\binom nk .
+\end{equation}
+The equality on the right is Kummer's digit-sum formula \cite{Granville}.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:criterion}]
+First suppose \(n=mp^a\), where \(p\nmid m\) and \(m\ge2\).
+The identity
+\(\binom{n}{p^a}=m\binom{n-1}{p^a-1}\) gives divisibility by \(m\).
+Comparing coefficients of \(X^{p^a}\) in
+\((1+X)^n\equiv(1+X^{p^a})^m\pmod p\) shows that this coefficient is
+\(m\bmod p\). Consequently
+\begin{equation}\label{eq:attain}
+ \colg n{p^a}=m.
+\end{equation}
+Taking \(p^a=Q\) gives an admissible column attaining \(n/Q\).
+
+For any \(0\le k\le n\), let \(g=\colg nk\). Then \(g<n/Q\) is equivalent
+to \(n/g>Q\). In that case choose the least divisor \(d\) of \(n/g\) that
+exceeds \(Q\). Its largest proper divisor is \(d/s(d)\), so \(d\in\crit(n)\).
+Conversely, any \(d\in\crit(n)\) dividing \(n/g\) gives \(g<n/Q\).
+At a prime power \(p^b\parallel d\), put \(a=v_p(n)\). The condition
+\(p^b\mid n/g\) is precisely \(v_p\binom nk\le a-b\). By
+Lemma~\ref{lem:splits} this is equivalent to \(k\in S_{p,b}(n)\).
+Thus \(d\mid n/g\) is equivalent to \(k\in I_d(n)\).
+
+The endpoints belong to every \(I_d(n)\). At \(k=1,n-1\) the gcd equals
+\(n\), and symmetry interchanges \(k\) and \(n-k\). Hence every interior
+point of an intersection for \(d\in\crit(n)\) yields a witness in the
+range of \eqref{eq:definition}. This proves \eqref{eq:Q}. Since
+\(P\le Q\) and \(f(n)\le n/Q\), equality with \(n/P\) forces \(P=Q\).
+This proves \eqref{eq:P}.
+
+Finally, for \(n=p^a\) and \(0<k<p^a\) one has
+\(v_p\binom{p^a}{k}=a-v_p(k)\). Indeed
+\(\binom{p^a}{k}=(p^a/k)\binom{p^a-1}{k-1}\), and the second binomial is
+a unit modulo \(p\) by Lucas's theorem \cite{Granville}.
+The valuation is at least one and is one at \(k=p^{a-1}\).
+Now \(n/Q=1\) and \(n/P=p^{a-1}\), proving the last assertion.
+\end{proof}
+
+\paragraph{Examples.}
+For \(n=30\), one has \(Q=5\) and \(\crit(30)=\{6,10,15\}\).
+No splits are available. The base-two terms are \(2,4,8,16\), so their
+subset sums are even. The interior base-three sums are \(3,27\), and the
+interior base-five sums are \(5,25\). These three interior sets are
+pairwise disjoint, giving \(f(30)=6\), an example in \cite{ES}.
+For \(n=45\), one has \(Q=9\) and \(\crit(45)=\{15\}\).
+In base three, split one \(9\) in \(27+9+9\) to obtain the subsum
+\(9+3+3=15\). In base five, three of the four \(5\)'s in
+\(25+5+5+5+5\) give the same sum. Hence \(15\mid45/\colg{45}{15}\),
+so this column is at most \(3\). The identity
+\(n\mid k\binom nk\) implies \(n\mid k\colg nk\), by cancellation after
+dividing both \(n\) and \(\binom nk\) by their gcd. In particular no
+interior gcd is \(1\). The least possible divisor of \(45\) greater than
+\(1\) is \(3\), giving \(f(45)=3<5\).
+
+For squarefree \(n\) no splits are possible. Membership in \(S_{p,1}(n)\)
+then means that each base-\(p\) digit of \(k\) is at most the corresponding
+digit of \(n\). For \(n=10815=3\cdot5\cdot7\cdot103\), the divisor
+\(105\) is in \(\crit(n)\). The digits of \(k=3255\) satisfy this test
+in all three bases \(3,5,7\), giving \(f(n)\le n/105=103<105=n/Q\).
+
+\paragraph{Computing the intersections.}
+The sets \(S_{p,b}(n)\) can be computed without listing refinements.
+Read the base-\(p\) digits of a candidate \(k\) from least to most
+significant, subtracting them from \(n\). With incoming borrow \(u\in\{0,1\}\),
+digit \(x\) at position \(i\) produces a new borrow precisely when
+\(x+u>n_i\). Keep the partial sums \(\sum_{j\le i}x_jp^j\) for each
+pair consisting of the outgoing borrow and the number of borrows so far.
+Start at sum zero with no borrow, discard counts above \(v_p(n)-b\),
+and require zero outgoing borrow at the final digit. Subtraction borrows
+are the carries in \(k+(n-k)\), so \eqref{eq:kummer} proves that the
+surviving sums are precisely \(S_{p,b}(n)\). Bitsets indexed by \(k\)
+then implement the intersections in \eqref{eq:Q}.
+
+\section{A fixed cofactor and a varying prime}\label{sec:primes}
+
+When \(n=mp\) with \(p>m\) prime, one has \(P(n)=Q(n)=p\).
+The problem is to decide whether some column improves on the value \(m\)
+at \(k=p\). We first record a divisibility test that works simultaneously
+at all columns of a scaled row.
+
+\begin{lemma}\label{lem:block}
+Let \(\ell\) be prime, \(Y\ge A\ge2\), and \(a\ge1\). Put
+\(H=\lceil\log_\ell Y\rceil\) and \(L=H+a-1\). Suppose that the
+base-\(\ell\) expansion of a positive integer \(z\) contains \(L\)
+consecutive digits equal to \(\ell-1\). Then
+\[
+   \ell^a\mid\binom{Az}{tz}\qquad(1\le t<A).
+\]
+\end{lemma}
+
+\begin{proof}
+Let the run start at position \(d\), with the units digit at position
+zero, and put \(v=\ell^d-(z\bmod\ell^d)\). Thus \(1\le v\le\ell^d\).
+For \(H\le j\le H+a-1\), put \(M=\ell^{d+j}\). The run gives
+\(z\equiv-v\pmod M\) and \(Av\le M\). The least nonnegative residues
+of \(tz\) and \((A-t)z\) are \(M-tv\) and \(M-(A-t)v\).
+Their sum \(2M-Av\) is at least \(M\), so addition produces a carry
+into position \(d+j\). The \(a\) choices of \(j\) give distinct carries.
+Kummer's theorem gives the required divisibility.
+\end{proof}
+
+\begin{theorem}\label{thm:prime}
+Fix \(m\ge2\), and let \(E_m(X)\) count the primes \(m<p\le X\) for
+which \(f(mp)<m\). There are constants \(C_m,\delta_m>0\) such that
+\(E_m(X)\le C_m X^{1-\delta_m}\) for every integer \(X\ge1\).
+Consequently \(f(mp)=m\) on a set of primes of relative density one.
+\end{theorem}
+
+\begin{proof}
+Since \(mp\mid k\colg{mp}{k}\), each column with \(p\nmid k\) has gcd
+at least \(p>m\). At \(k=tp\), \(1\le t\le m/2\), Lucas's theorem gives
+\(\binom{mp}{tp}\equiv\binom mt\not\equiv0\pmod p\). Thus the gcd at
+this column is \(\gcd(m,\binom{mp}{tp})\), and \eqref{eq:attain} gives
+equality at \(t=1\). We have proved
+\begin{equation}\label{eq:primecolumns}
+ f(mp)=m\quad\Longleftrightarrow\quad
+ m\mid\binom{mp}{tp}\quad(1\le t\le\lfloor m/2\rfloor).
+\end{equation}
+For each \(\ell^a\parallel m\), take \(Y=A=m\) in Lemma~\ref{lem:block}
+and write \(B_\ell=\ell^{\lceil\log_\ell m\rceil+a-1}\).
+One occurrence of the digit \(B_\ell-1\) in base \(B_\ell\) supplies a
+whole run of maximal base-\(\ell\) digits. If this happens for every
+\(\ell\mid m\), all the divisibilities in \eqref{eq:primecolumns} follow.
+
+For \(B=B_\ell\), the integers \(0\le z\le X\) can be written with
+\(r=1+\lfloor\log_B X\rfloor\) base-\(B\) digits, padding with zeros.
+At most \((B-1)^r\) such strings omit \(B-1\). Summing over the primes
+dividing \(m\) gives
+\[
+ E_m(X)\le\sum_{\ell\mid m}(B_\ell-1)^{1+\lfloor\log_{B_\ell}X\rfloor}.
+\]
+For \(B\ge2\) set \(\theta(B)=\log(B-1)/\log B<1\). Each summand
+is at most \((B_\ell-1)X^{\theta(B_\ell)}\). This proves the bound
+with \(\delta_m=1-\max_{\ell\mid m}\theta(B_\ell)>0\).
+Chebyshev's lower bound \(\pi(X)\gg X/\log X\), where \(\pi\) counts
+primes, gives \(E_m(X)/\pi(X)\to0\).
+\end{proof}
+
+\section{A fixed cofactor and a varying exponent}\label{sec:powers}
+
+Fix \(m\ge2\) and a prime \(q\nmid m\). Equation~\eqref{eq:attain}
+gives \(f(mq^e)\le m\) for all \(e\ge1\). For sufficiently large
+\(e\), the prime power \(q^e\) is \(Q(mq^e)\), so equality with \(m\)
+is the original Erd\H{o}s--Szekeres equality. We first bound the number
+of candidate columns independently of \(e\).
+
+\begin{proposition}\label{prop:candidates}
+For \(e\ge1\), put
+\[
+ h=\min\{e,\lfloor\log_q(m-1)\rfloor\},\quad z=q^{e-h},\quad A=mq^h.
+\]
+Then \(A\le m(m-1)\). Every column with gcd below \(m\) in the range
+of \eqref{eq:definition} has the form \(k=tz\), \(1\le t\le A/2\).
+The gcd at each such index is
+\begin{equation}\label{eq:powercolumns}
+ \colg{Az}{tz}
+ =q^{\min\{e,v_q\binom At\}}
+   \prod_{\ell^a\parallel m}\ell^{\min\{a,v_\ell\binom{Az}{tz}\}} .
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+The bound on \(A\) follows from \(q^h\le m-1\). If \(h=e\) then
+\(z=1\). Otherwise \(m\le q^{h+1}\). For \(g=\colg{Az}{k}<m\)
+one has \(v_q(g)\le h\), and \(q^e\mid kg\) forces \(q^{e-h}\mid k\).
+The bound on \(t\) is now the admissible half-row bound. Multiplication
+by \(z\) shifts base-\(q\) digits, preserving the carries in
+\(t+(A-t)\). Thus \(v_q\binom{Az}{tz}=v_q\binom At\), and factoring
+the gcd yields \eqref{eq:powercolumns}. If \(tz=1\), then
+\(\colg{Az}{1}=Az\), so including this index in a test for \(g<m\)
+does not affect the result.
+\end{proof}
+
+\begin{theorem}\label{thm:exponents}
+For every \(m\ge2\) there exists \(\eta_m>0\) such that for every prime
+\(q\nmid m\) there is a constant \(C_{m,q}>0\) with
+\begin{equation}\label{eq:exponents}
+ \#\{1\le e\le E: f(mq^e)<m\}
+ \le C_{m,q}E^{1-\eta_m}\qquad(E\ge1).
+\end{equation}
+In particular \(f(mq^e)=m\) on a set of exponents of natural density one.
+\end{theorem}
+
+\begin{proof}
+Set \(h_0=\lfloor\log_q(m-1)\rfloor\), \(Y=m(m-1)\). For \(e\ge h_0\)
+write \(s=e-h_0\). For each \(\ell^a\parallel m\) use
+\[
+ L_\ell=\lceil\log_\ell Y\rceil+a-1,\qquad B_\ell=\ell^{L_\ell}.
+\]
+If the expansion of \(q^s\) in base \(B_\ell\) contains \(B_\ell-1\)
+for every \(\ell\mid m\), Lemma~\ref{lem:block} with \(A=mq^{h_0}\)
+gives \(m\mid\binom{Aq^s}{tq^s}\) for all \(1\le t<A\).
+Proposition~\ref{prop:candidates} then gives equality.
+
+We bound how often an expansion can omit its maximal digit. For each
+prime \(\ell\ne q\) there exists \(c=c_{\ell,q}\ge0\) such that
+\begin{equation}\label{eq:periodloss}
+ q^u\equiv q^v\pmod{\ell^R}
+ \quad\Longrightarrow\quad
+ u\equiv v\pmod{\ell^{\max(R-c,0)}} .
+\end{equation}
+For \(d=|u-v|>0\) the first congruence implies \(\ell^R\mid q^d-1\).
+If \(\ell\) is odd, apply the valuation formula
+\(v_\ell(x^d-1)=v_\ell(x-1)+v_\ell(d)\) to \(x=q^{\ell-1}\equiv1\pmod\ell\).
+Since \(q^d-1\mid x^d-1\), this bounds \(R\).
+If \(\ell=2\), \(q\) is odd and
+\(v_2(q^{2d}-1)=v_2(q-1)+v_2(q+1)+v_2(d)\), which gives the same
+conclusion. Indeed, for \(\ell\mid y\) and \(r\) prime to \(\ell\), the
+binomial expansion gives \(v_\ell((1+y)^r-1)=v_\ell(y)\). For \(r=\ell\)
+the valuation increases by one if \(\ell\) is odd, or if \(\ell=2\)
+and \(4\mid y\). In the even case start with \(1+y=q^2\).
+If \(u=v\), \eqref{eq:periodloss} is immediate.
+
+Fix \(\ell\mid m\), set \(B=B_\ell\), \(r=1+\lfloor\log_B E\rfloor\),
+and take \(R=L_\ell r\). Then \(E<B^r=\ell^R\).
+The bottom \(r\) digits of \(q^s\) have at most \((B-1)^r\) possible
+values if they omit \(B-1\). By \eqref{eq:periodloss}, exponents
+yielding any one such residue belong to a single class modulo
+\(\ell^{\max(R-c,0)}\). Since \(0\le s\le E<\ell^R\), at most
+\(\ell^c\) exponents give that residue. The total exceptional count is
+therefore bounded by
+\[
+ h_0+\sum_{\ell\mid m}\ell^{c_{\ell,q}}
+      (B_\ell-1)^{1+\lfloor\log_{B_\ell} E\rfloor}.
+\]
+As in Theorem~\ref{thm:prime}, take
+\(\eta_m=1-\max_{\ell\mid m}\theta(B_\ell)>0\). The bases \(B_\ell\)
+depend only on \(m\) and its prime factors, giving the asserted uniformity
+in \(q\). Dividing \eqref{eq:exponents} by \(E\) proves the density statement.
+\end{proof}
+
+\begin{corollary}\label{cor:progression}
+Suppose \(e_0\ge\max\{1,\lfloor\log_q(m-1)\rfloor\}\) and \(f(mq^{e_0})=m\).
+For the primes \(\ell\mid m\) put
+\[
+ R_\ell=1+\lfloor\log_\ell(mq^{e_0})\rfloor,\qquad
+ T=\lcm_{\ell\mid m}\ord_{\ell^{R_\ell}}(q),
+\]
+where \(\ord_N(q)\) is the multiplicative order of \(q\) modulo \(N\).
+Then \(f(mq^{e_0+jT})=m\) for all \(j\ge0\). Every residue class modulo
+any \(D\ge1\) contains such an infinite progression of equality exponents,
+with arbitrarily large first term.
+\end{corollary}
+
+\begin{proof}
+The value \(h=\lfloor\log_q(m-1)\rfloor\) is fixed above \(e_0\).
+Put \(z_0=q^{e_0-h}\) and \(z=q^{e_0+jT-h}\). Then
+\(z\equiv z_0\pmod{\ell^{R_\ell}}\). For each candidate \(t\) in
+Proposition~\ref{prop:candidates}, the residues of \(tz,(A-t)z\) agree
+through the lowest \(R_\ell\) digits with those at \(z_0\).
+Every old carry occurs within those digits because \(Az_0<\ell^{R_\ell}\).
+Hence the \(\ell\)-adic valuation in \eqref{eq:powercolumns} cannot
+decrease. Its \(q\)-part also cannot decrease because \(v_q\binom At\)
+is fixed. Each old gcd thus divides the corresponding new gcd. All were
+at least \(m\), and \eqref{eq:attain} still gives \(m\).
+Finally each residue class modulo \(D\) has positive density, so
+Theorem~\ref{thm:exponents} supplies an arbitrarily large seed \(e_0\)
+there. Replacing \(T\) by \(\lcm(T,D)\) keeps the progression in the class.
+\end{proof}
+
+\newpage
+\section{Exact values for small cofactors}\label{sec:families}
+
+\subsection{Cofactor eight and a varying prime}
+
+\begin{proposition}\label{prop:eight}
+For a prime \(p>8\), one has \(f(8p)=4\) if \(p-1\) or \(3p-1\) is
+a power of two. In all other cases \(f(8p)=8\).
+\end{proposition}
+
+\begin{proof}
+Write \(w(x)=\ds_2(x)\). Only \(k=tp\) with \(1\le t\le4\) can improve
+on \(8\), and the prime \(p\) drops out of each gcd as in
+\eqref{eq:primecolumns}. For \(t=1,3\), the relation
+\(8\mid tp\,\colg{8p}{tp}\) forces the gcd to be \(8\).
+For \(t=2\), the valuation in \eqref{eq:kummer} is
+\(w(2p)+w(6p)-w(8p)=w(3p)\). For \(t=4\) it is \(2w(4p)-w(8p)=w(p)\).
+Consequently
+\[
+  f(8p)=2^{\min\{3,w(p),w(3p)\}} .
+\]
+An odd integer \(x>1\) has at least two binary ones. It has exactly two
+precisely when \(x=2^j+1\) for some \(j\ge1\).
+\end{proof}
+
+For example, \(3\cdot11-1=32\) gives \(f(88)=4\), while \(f(104)=8\).
+Each exponent \(j\) gives at most two primes from the two equations, so
+this family has only \(O(\log X)\) exceptions up to \(p\le X\).
+
+\subsection{Cofactors four and six at all exponents}
+
+\begin{theorem}\label{thm:small}
+For every odd prime \(q\) and \(e\ge1\), \(f(4q^e)=4\) apart from
+\(f(12)=3\). For every \(e\ge1\), \(f(6\cdot5^e)=6\).
+\end{theorem}
+
+\begin{proof}
+For \(q\ge5\), put \(x=q^e\). In the row \(4x\),
+Proposition~\ref{prop:candidates} leaves \(k=x,2x\). The first gives
+\(4\) by \eqref{eq:attain}. At the centre,
+\(v_2\binom{4x}{2x}=2w(2x)-w(4x)=w(x)\ge2\), since \(x>1\) is odd.
+Hence the second gcd is a multiple of \(4\).
+
+For \((m,q)=(4,3),(6,5)\) and \(e\ge2\), take \(h=1\), \(A=mq\),
+\(z=q^{e-1}\). If \(g=\colg{Az}{tz}<m\), then \(A\mid tg\), by
+\(Az\mid tz\,g\), and \eqref{eq:powercolumns} forces
+\[
+ \min\{2,v_q(g)\}=\min\!\left\{2,v_q\binom At\right\}.
+\]
+Table~\ref{tab:exclusions} lists all \(1\le t\le A/2,\ 1\le g<m\)
+with \(A\mid tg\). The valuations in its last column follow from
+\eqref{eq:kummer}. Each pair fails the displayed equality.
+Thus \eqref{eq:attain} gives the asserted value. For \(e=1\), the
+values \(f(12)=3\) and \(f(30)=6\) were computed in
+Sections~\ref{sec:intro} and~\ref{sec:criterion}.
+\end{proof}
+
+\begin{table}[ht]
+\centering
+\caption{Candidate pairs in the two remaining rows, listed in matching order.}
+\label{tab:exclusions}
+\begin{tabular}{@{}cccll@{}}
+\toprule
+\(m\)&\(q\)&\(A\)& \((t,g)\) with \(A\mid tg\) & \(v_q\binom At\)\\
+\midrule
+4&3&12& \((6,2),(4,3)\) & \(1,2\)\\
+6&5&30& \((15,2),(10,3),(15,4),(6,5),(12,5)\) & \(1,1,1,2,2\)\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\clearpage
+\subsection{Cofactor nine and ternary digits}
+
+\begin{theorem}\label{thm:nine}
+For \(e\ge4\),
+\[
+ f(9\cdot2^e)=
+ \begin{cases}
+  4,&\text{if the ternary expansion of \(2^{e-1}\) omits the digit \(2\)},\\
+  9,&\text{if that expansion contains the digit \(2\)}.
+ \end{cases}
+\]
+In particular the set of \(e\ge4\) giving the value \(4\) is finite if
+and only if the set of \(t\ge0\) for which \(2^t\) omits the ternary
+digit \(2\) is finite.
+\end{theorem}
+
+\begin{proof}
+Set \(n=9\cdot2^e\). The column \(k=2^e\) gives \(9\) by
+\eqref{eq:attain}. Suppose an admissible \(k\) has \(g=\colg nk<9\).
+If \(3\nmid k\), then \(9\mid g\) by \(n\mid kg\). If \(3\mid k\)
+but \(9\nmid k\), the same relation gives \(3\mid g\), so \(v_2(g)\le1\)
+and \(2^{e-1}\mid k\). Writing \(k=t2^{e-1}\) leaves \(t=3,6\).
+Deleting a common binary shift, the binomial valuations
+\(v_2\binom{18}{3},v_2\binom{18}{6}\) are \(4,2\). Both contradict
+\(v_2(g)\le1\) since \(e\ge4\).
+
+It remains to consider \(9\mid k\). Now \(v_2(g)\le3\), so
+\(k=9\cdot2^{e-3}u\) with \(1\le u\le4\). The four values
+\(v_2\binom{72}{9u}\) are \(6,4,6,2\), respectively, by
+\eqref{eq:kummer}. Only \(u=4\) remains, namely \(k=n/2\), and its
+binomial coefficient has 2-adic valuation two. In base three, adding
+\(n/2=9\cdot2^{e-1}\) to itself produces a carry precisely when its
+expansion has a digit \(2\). Multiplication by \(9\) appends two zeros.
+Thus at the centre the gcd is \(4\) if \(2^{e-1}\) omits \(2\),
+and is divisible by \(12\) otherwise. This proves the formula. The
+shift \(t=e-1\) leaves only \(t=0,1,2\) outside the comparison, which
+proves the finiteness equivalence.
+\end{proof}
+
+The finiteness question in Theorem~\ref{thm:nine} is Erd\H{o}s
+Problem~406 \cite{digits}. Saye \cite{Saye} verified that, for
+\(0\le t\le2\cdot3^{45}\), only \(2^t=1,4,256\) omit the ternary
+digit \(2\). Thus the unique exceptional exponent in the verified
+range \(4\le e\le2\cdot3^{45}+1\) is \(e=9\), for which
+\(2^8=(100111)_3\) and \(f(4608)=4\). The formula leaves open the
+finiteness of the full exceptional set. Holdum, Klausen and Rasmussen
+\cite{HKR} used the digits of powers in prime bases to bound exceptions
+to divisibility for central binomial coefficients. Here the reduction
+to a central column follows from the exclusion of all other possible
+minimizers below \(9\).
+
+\appendix
+\section{Formal proofs and numerical checks}\label{sec:verification}
+
+Lean~4 and mathlib are pinned to \texttt{v4.33.0-rc1}.
+Table~\ref{tab:lean} lists the main declarations in the namespace
+\texttt{Erdos700}. The theorem \leanname{equality_sets} uses the infimum
+definition of \(f\) in the Formal Conjectures statement \cite{formal}.
+
+\begin{table}[!ht]
+\centering
+\caption{Main results and their Lean declarations.}
+\label{tab:lean}
+\small
+\renewcommand{\arraystretch}{1.02}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Result & Declaration in \texttt{Erdos700}\\
+\midrule
+Theorem~\ref{thm:criterion} & \leanname{all_composite_criteria}, \leanname{equality_sets}\\
+Theorem~\ref{thm:prime} & \leanname{exceptional_prime_power_saving}\\
+Theorem~\ref{thm:exponents} & \leanname{exceptional_exponent_power_saving}\\
+Corollary~\ref{cor:progression} & \leanname{equality_progression_of_seed}\\
+ & \leanname{equality_progression_in_every_class}\\
+Proposition~\ref{prop:eight} & \leanname{eight_prime_classification}\\
+Theorem~\ref{thm:small} & \leanname{four_odd_prime_power}, \leanname{six_five_power}\\
+Theorem~\ref{thm:nine} & \leanname{nine_mul_two_pow}, \leanname{nine_exceptions_finite_iff}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Numerical checks.}
+Two Python programs accompany the proofs in the author's repository
+(\href{https://github.com/yoshiyoyoyo44/erdos700}{\nolinkurl{github.com/yoshiyoyoyo44/erdos700}}).
+The first compares
+Theorem~\ref{thm:criterion} with the minimum computed from exact
+binomial coefficients for all \(4{,}330\) composites \(n\le5{,}000\).
+There are \(2{,}811\) equalities with \(n/Q(n)\) and \(2{,}578\) with
+\(n/P(n)\). For \(n\le144\), it also enumerates the refinements directly.
+
+The second program checks Proposition~\ref{prop:eight} against the
+cofactor formula for all \(9{,}588\) primes \(8<p\le100{,}000\), with
+direct full-row checks for the \(91\) primes \(p\le500\) in that range.
+The exceptional primes found were
+\[
+ 11,\quad17,\quad43,\quad257,\quad683,\quad2731,\quad43691,\quad65537.
+\]
+It also checks \(19{,}840\) instances of Theorem~\ref{thm:small},
+including \(130\) direct row minima. The repository README gives the
+commands for reproducing the computations and checking the formal proofs.
+OpenAI Codex assisted with the English manuscript and the Lean formalization.
+
+\pdfbookmark[1]{References}{references}
+\begin{thebibliography}{9}
+\bibitem{ES}
+P.~Erd\H{o}s and G.~Szekeres,
+\href{https://static.renyi.hu/~p_erdos/1978-46.pdf}{Some number theoretic problems on binomial coefficients}.
+\emph{Aust. Math. Soc. Gaz.} \textbf{5} (1978), 97--99.
+
+\bibitem{Bloom}
+T.~F.~Bloom (ed.), \href{https://www.erdosproblems.com/700}{Erd\H{o}s Problem 700},
+\emph{Erd\H{o}s Problems}. See also the
+\href{https://www.erdosproblems.com/forum/thread/700?order=oldest}{discussion of special families}.
+
+\bibitem{Granville}
+A.~Granville,
+\href{https://www.cecm.sfu.ca/organics/papers/granville/}{Arithmetic properties of binomial coefficients I: Binomial coefficients modulo prime powers}.
+\emph{CMS Conf. Proc.} \textbf{20} (1997), 253--275.
+
+\bibitem{digits}
+T.~F.~Bloom (ed.), \href{https://www.erdosproblems.com/406}{Erd\H{o}s Problem 406},
+\emph{Erd\H{o}s Problems}.
+
+\bibitem{Saye}
+R.~I.~Saye,
+\href{https://cs.uwaterloo.ca/journals/JIS/VOL25/Saye/saye3.html}{On two conjectures concerning the ternary digits of powers of two}.
+\emph{J. Integer Seq.} \textbf{25} (2022), Article 22.3.4.
+
+\bibitem{HKR}
+S.~T.~Holdum, F.~R.~Klausen and P.~M.~R.~Rasmussen,
+\href{https://math.colgate.edu/~integers/p43/p43.pdf}{Powers in prime bases and a problem on central binomial coefficients}.
+\emph{Integers} \textbf{15} (2015), A43.
+
+\bibitem{formal}
+Google DeepMind and contributors,
+\href{https://github.com/google-deepmind/formal-conjectures/blob/2c24ebe7eb2a79b47f9ffcab618cd611c2bc1ea6/FormalConjectures/ErdosProblems/700.lean}{Formal Conjectures, Erd\H{o}s Problem 700}.
+Lean statements, revision \texttt{2c24ebe}.
+\end{thebibliography}
+
+\end{document}

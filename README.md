@@ -1,62 +1,67 @@
-# エルデシュ問題 #700(a)　全合成数の等号判定と指数族
+# Equality in a binomial gcd bound of Erdős and Szekeres
 
-2026年11月18日付の研究ノート、Leanによる形式証明、11月19日の追加結果と検証コードを収録しています。 [元の研究ノート（PDF）](erdos-700-general-criterion.pdf) · [固定余因子の密度と例外の分類](RESEARCH.md)
+**Yoshiharu Onishi · Preprint · November 20, 2026**
 
-合成数 $n$ に対して、二項係数と $n$ の最大公約数の最小値を調べます。
+[Read the paper (PDF)](paper/erdos-700.pdf) · [LaTeX source](paper/erdos-700.tex) · [Lean proofs](Erdos700) · [Citation](CITATION.cff)
+
+For a composite integer $n\ge 4$, let
 
 $$
-f(n)=\min_{2\le k\le\lfloor n/2\rfloor}\gcd\!\left(n,\binom{n}{k}\right).
+f(n)=\min_{2\leq k\leq\lfloor n/2\rfloor}\gcd\left(n,\binom{n}{k}\right).
 $$
 
-$P$ を $n$ の最大素因数、$Q$ を $n$ を割る最大の素数べきとします。Erdős–Szekeresの原論文では $f(n)=n/Q$、問題集の #700(a) では $f(n)=n/P$ となる合成数を問います。 [原論文（1978年）](https://static.renyi.hu/~p_erdos/1978-46.pdf) · [Erdős Problems #700](https://www.erdosproblems.com/700)
+Erdős and Szekeres asked when $f(n)=n/Q(n)$, where $Q(n)$ is the largest prime power dividing $n$. The problem collection asks the same question with the largest prime factor $P(n)$ in the denominator. At $n=12$, the minimum is $3=12/Q(12)$, while $12/P(12)=4$. The paper gives a finite necessary and sufficient condition for each equality, using the base expansions of $n$ and its prime factorization. [Original paper, pp. 98–99](https://static.renyi.hu/~p_erdos/1978-46.pdf) · [Erdős Problem 700](https://www.erdosproblems.com/700)
 
-## 主な結果
+## Results and formal proofs
 
-- **全合成数の等号判定（定理1）**　素数べきの分割から得られる部分和の共通部分を使い、両方の等号に対する必要十分条件を与えます。
-- **固定した素数と余因子（定理2）**　$m\ge 2$ と $m$ を割らない素数 $q$ を固定すると、$1\le e\le E$ で $f(mq^e)<m$ となる指数の個数は、ある $\delta_m>0$ に対して $O_{m,q}(E^{1-\delta_m})$ です。
-- **三進表記との関係**　$e\ge 4$ において $f(9\cdot 2^e)=4$ となるのは、$2^{e-1}$ の三進表記に数字 $2$ が現れない場合に限ります。この族における原論文版の例外指数の有限性は、#406と同値です。 [Erdős Problems #406](https://www.erdosproblems.com/406)
-- **素数を動かしたときの等号**　任意の整数 $m\ge2$ を固定すると、$p>m$ を満たす素数のうち $f(mp)=m$ となるものの相対密度は $1$ です。$p\le X$ の例外数には $C_m X^{1-\delta_m}$ という上界があり、$\delta_m>0$ です。 [個数の上界](Erdos700/Sparse.lean) · [素数に対する密度](Erdos700/Density.lean)
-- **$n=8p$ の完全分類**　素数 $p>8$ について、$p-1$ または $3p-1$ が $2$ のべきなら $f(8p)=4$、それ以外は $f(8p)=8$ です。 [形式証明](Erdos700/EightPrime.lean)
-- **全指数で決まる族**　任意の奇素数 $q$ と $e\ge1$ について $f(4q^e)=4$ で、唯一の例外は $f(12)=3$ です。また $f(6\cdot5^e)=6$ はすべての $e\ge1$ で成立します。 [形式証明と有限の判定表](Erdos700/SmallCofactors.lean)
+| Result in the preprint | Lean source |
+| --- | --- |
+| Equality criterion for every composite $n$, including prime powers (Theorem 2.1) | [Classification](Erdos700/Classification.lean) · [Equality sets in the infimum formulation](Erdos700/AnswerSets.lean) |
+| For fixed $m\ge2$, the primes $p>m$ with $f(mp)=m$ have relative density one (Theorem 3.2) | [Prime counts and density](Erdos700/Density.lean) |
+| For fixed $m\ge2$, the number of exceptions $1\le e\le E$ to $f(mq^e)=m$ is $O_{m,q}(E^{1-\eta_m})$, with $\eta_m>0$ independent of the prime $q\nmid m$ (Theorem 4.2) | [Bounded candidate columns](Erdos700/PowerFamilies.lean) · [Exceptional exponents](Erdos700/ExponentDensity.lean) |
+| An equality exponent above the cutoff gives an infinite arithmetic progression. Every residue class contains such a progression (Corollary 4.3) | [Arithmetic progressions](Erdos700/Progressions.lean) |
+| Exact formulas for $8p$, $4q^e$, $6\cdot5^e$, and $9\cdot2^e$ under the hypotheses in Section 5 | [Cofactor eight](Erdos700/EightPrime.lean) · [Cofactors four and six](Erdos700/SmallCofactors.lean) · [Ternary digits](Erdos700/Families.lean) |
 
-## Leanによる形式証明
+For example, when $p>8$ is prime, $f(8p)=4$ precisely when $p-1$ or $3p-1$ is a power of two. Otherwise $f(8p)=8$. For $e\ge4$, the exceptional value $f(9\cdot2^e)=4$ occurs exactly when the ternary expansion of $2^{e-1}$ omits the digit $2$. Finiteness of those exceptions is equivalent to the finiteness question in Problem 406. [Erdős Problem 406](https://www.erdosproblems.com/406)
 
-定理1を、すべての合成数について原論文版と問題集版を同時に扱う定理 `Erdos700.all_composite_criteria` として証明しています。素数べきの場合には $f(p^a)=p$（$a\ge 2$）となり、問題集版の等号を満たすのは素数の平方に限られます。 [定理1の全文](Erdos700/Classification.lean) · [問題文の定義での解集合](Erdos700/AnswerSets.lean) · [素数べきの場合](Erdos700/PrimePowers.lean)
+The classification concerns part (a) of Problem 700. Parts (b) and (c) ask about infinitely many $n$ with $f(n)>\sqrt n$ and uniform logarithmic upper bounds. The formalization uses the same infimum definition of $f$ as the following version of the public problem statement. [Formal Conjectures, revision 2c24ebe](https://github.com/google-deepmind/formal-conjectures/blob/2c24ebe7eb2a79b47f9ffcab618cd611c2bc1ea6/FormalConjectures/ErdosProblems/700.lean)
 
-証明では $p^{j+1}$ 一つを $p^j$ の $p$ 個のコピーに分割する操作を定義し、部分和 $k$ に必要な最小分割回数が $\binom{n}{k}$ の $p$ 進付値と一致することを示します。この結果を、$n$ を割る最大の素数べき $Q$ を初めて超える約数に適用します。 [分割回数と付値](Erdos700/Splits.lean) · [二項係数と最大公約数](Erdos700/Arithmetic.lean) · [共通部分和による等号判定](Erdos700/Criterion.lean)
+## Reproducing the proofs and computations
 
-LeanとMathlibのバージョンは `v4.33.0-rc1` です。Elanを用意し、リポジトリのルートで次のコマンドを実行すると証明を検査できます。
+Run the commands from the repository root. With Elan installed, the project selects Lean `v4.33.0-rc1`. The Lake manifest pins mathlib and the other dependencies.
 
 ```sh
 lake exe cache get
 lake build
 ```
 
-ビルド済みの証明をLeanカーネルで再検査するには、対象のモジュールを指定できます。
+To recheck individual compiled modules with the Lean kernel, for example, run
 
 ```sh
-lake env leanchecker Erdos700.AnswerSets
-lake env leanchecker Erdos700.ExponentDensity Erdos700.Progressions
+lake env leanchecker Erdos700.AnswerSets Erdos700.ExponentDensity Erdos700.Progressions Erdos700.SmallCofactors
 ```
 
-元のPDFの定理2も形式証明しました。指数の上限を $E$ とすると、例外数は $C_{m,q}E^{1-\delta_m}$ 以下で、同じ $m$ に対するすべての素数 $q\nmid m$ に共通の $\delta_m>0$ が使えます。等号を与える一つの指数から無限等差数列を構成する定理、任意の剰余類にそのような数列が存在する定理、具体例 $f(4\cdot3^{2+16j})=4$ もすべての $j\ge0$ について検証しています。 [候補列の公式](Erdos700/PowerFamilies.lean) · [例外指数の密度](Erdos700/ExponentDensity.lean) · [無限等差数列](Erdos700/Progressions.lean)
-
-$n=9\cdot2^e$ の公式と #406 との同値、$n=8p$ の完全分類、および素数 $p$ を動かす密度定理の証明も収録しています。 [三進表示の証明](Erdos700/Families.lean) · [研究ノートと検証範囲](RESEARCH.md)
-
-## 計算の再現
-
-Python 3.10以降の標準ライブラリで実行できます。 [検証コード](verify_erdos700_general.py)
+The two numerical checks use Python 3.10 or newer and the standard library.
 
 ```sh
-python verify_erdos700_general.py
-```
-
-$4\le n\le 5000$ の合成数4,330個について、判定結果を定義からの直接計算と照合します。等号が成立するのは原論文版で2,811個、問題集版で2,578個です。$n\le 144$ では、分割から直接求めた部分和の集合を桁ごとの計算とも比較します。
-
-追加の計算は次のコマンドで再現できます。$n=8p$ の分類を $p\le100000$ の該当素数9,588個で照合し、そのうち $p\le500$ の91個では元の定義のすべての列も直接調べます。余因子 $4,6$ の新しい指数族についても19,840件を照合し、うち130件で全列の最小値を直接計算します。 [追加の検証コード](verify_large_prime.py)
-
-```sh
+python -B verify_erdos700_general.py
 python -B verify_large_prime.py
 ```
 
-一般判定が対象とするのは #700(a) の二つの等号集合です。研究ノートの学術的な新規性と外部査読は未確認です。照合した公開記録では (a) を未解決として扱っています。 [問題集での掲載状況](https://www.erdosproblems.com/history/700) · [公開されているLeanの問題文](https://github.com/google-deepmind/formal-conjectures/blob/2c24ebe7eb2a79b47f9ffcab618cd611c2bc1ea6/FormalConjectures/ErdosProblems/700.lean)
+The first program compares the criterion with direct row minima for all 4,330 composite integers through 5,000. It finds 2,811 equalities with $n/Q(n)$ and 2,578 with $n/P(n)$. Through $n=144$ it also enumerates prime-power splits and compares their subset sums with the digit algorithm. [General verification script](verify_erdos700_general.py)
+
+The second program checks all 9,588 primes $8<p\le100{,}000$ by the cofactor formula, including direct row minima for all 91 primes $8<p\le500$. It also checks 19,840 instances for cofactors four and six, with 130 direct row minima. [Family verification script](verify_large_prime.py)
+
+## Building the paper
+
+The manuscript is a single LaTeX file with its bibliography included. The following Tectonic command writes `paper/erdos-700.pdf`.
+
+```sh
+tectonic -X compile --untrusted paper/erdos-700.tex
+```
+
+The English preprint was built with Tectonic 0.17.0 and a fixed timestamp of November 20, 2026 UTC. To reproduce that build, set `$env:SOURCE_DATE_EPOCH='1795132800'` in PowerShell or `export SOURCE_DATE_EPOCH=1795132800` in a POSIX shell before compiling.
+
+## Original research materials
+
+The November 18 Japanese note contains the original criterion and an embedded copy of the general verification script. The November 19 notes record the subsequent density results and special families. [Original Japanese PDF](archive/erdos-700-general-criterion.pdf) · [Japanese research notes](archive/research-notes.ja.md)

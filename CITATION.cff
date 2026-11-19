@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "Please cite the accompanying preprint when using these results, proofs, or programs."
+title: "Equality in a binomial gcd bound of Erdős and Szekeres"
+authors:
+  - family-names: Onishi
+    given-names: Yoshiharu
+repository-code: "https://github.com/yoshiyoyoyo44/erdos700"
+preferred-citation:
+  type: unpublished
+  title: "Equality in a binomial gcd bound of Erdős and Szekeres"
+  authors:
+    - family-names: Onishi
+      given-names: Yoshiharu
+  year: 2026
+  month: 11
+  notes: "Preprint dated November 20, 2026."
+  url: "https://github.com/yoshiyoyoyo44/erdos700/blob/main/paper/erdos-700.pdf"

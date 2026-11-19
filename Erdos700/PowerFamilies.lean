@@ -107,6 +107,19 @@ theorem power_equality_of_digits {m q s : ℕ} (hm : 2 ≤ m) (hq : q.Prime) (hq
   · have hz : m.factorization ℓ = 0 := Finsupp.notMem_support_iff.mp hℓ
     simp [hz]
 
+/-- The q-adic valuation of every candidate gcd is read from the bounded row m*q^h. -/
+theorem power_candidate_qVal {m q h s t : ℕ} (hm : 0 < m) (hq : q.Prime) (hqm : ¬q ∣ m)
+    (ht : t ≤ m*q^h) : (column (m*q^(h+s)) (t*q^s)).factorization q =
+      min (h+s) (((m*q^h).choose t).factorization q) := by
+  have hn := Nat.mul_ne_zero hm.ne' (pow_ne_zero (h+s) hq.ne_zero)
+  have hrow : m*q^(h+s) = (m*q^h)*q^s := by rw [pow_add, Nat.mul_assoc]
+  have hc : (m*q^(h+s)).choose (t*q^s) ≠ 0 := by
+    rw [hrow]; exact Nat.choose_ne_zero (Nat.mul_le_mul_right _ ht)
+  simp only [column, Nat.factorization_gcd hn hc, Finsupp.inf_apply, Nat.factorization_mul hm.ne'
+    (pow_ne_zero _ hq.ne_zero), Finsupp.add_apply, Nat.factorization_eq_zero_of_not_dvd hqm,
+    Nat.factorization_pow_self hq, zero_add]
+  rw [hrow, Nat.mul_comm (m*q^h), Nat.mul_comm t, factorization_choose_shift hq s ht]
+
 /-- The exact gcd at a candidate column: its q-adic contribution is read from a bounded row. -/
 theorem power_candidate_gcd {m q h s t : ℕ} (hm : 0 < m) (hq : q.Prime) (hqm : ¬ q ∣ m)
     (ht : t ≤ m*q^h) :
@@ -131,10 +144,8 @@ theorem power_candidate_gcd {m q h s t : ℕ} (hm : 0 < m) (hq : q.Prime) (hqm :
     · exact Finset.mem_insert.mpr (Or.inl ((Nat.prime_dvd_prime_iff_eq hp hq).mp (hp.dvd_of_dvd_pow hq')))
   have hval (ℓ : ℕ) : g.factorization ℓ = min (n.factorization ℓ) ((n.choose k).factorization ℓ) := by
     simp only [g, column, Nat.factorization_gcd hn hc, Finsupp.inf_apply]
-  have hqv : g.factorization q = min (h+s) (((m*q^h).choose t).factorization q) := by
-    rw [hval, show n.factorization q = h+s by simp only [n, Nat.factorization_mul hm.ne' (pow_ne_zero _ hq.ne_zero), Finsupp.add_apply,
-      Nat.factorization_eq_zero_of_not_dvd hqm, Nat.factorization_pow_self hq, zero_add]]
-    rw [hrow, Nat.mul_comm (m*q^h), show k=q^s*t from Nat.mul_comm _ _, factorization_choose_shift hq s ht]
+  have hqv : g.factorization q = min (h+s) (((m*q^h).choose t).factorization q) :=
+    power_candidate_qVal hm hq hqm ht
   calc
     g = ∏ ℓ ∈ g.primeFactors, ℓ^g.factorization ℓ := Nat.prod_primeFactors_pow_factorization hg
     _ = ∏ ℓ ∈ insert q m.primeFactors, ℓ^g.factorization ℓ := Finset.prod_subset hsub

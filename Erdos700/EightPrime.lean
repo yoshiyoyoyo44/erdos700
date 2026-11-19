@@ -18,7 +18,8 @@ private theorem binaryWeight_one_iff (x : ℕ) :
     have h := digitSum_shift (by decide : 1 < 2) j 1
     simpa [binaryWeight, Nat.digits_of_lt 2 1 (by decide) (by decide)] using h
 
-private theorem binaryWeight_odd {x : ℕ} (hx : 3 ≤ x) (ho : x % 2 = 1) :
+/-- The binary weight of an odd number greater than one is at least two. -/
+theorem binaryWeight_odd {x : ℕ} (hx : 3 ≤ x) (ho : x % 2 = 1) :
     2 ≤ binaryWeight x ∧ (binaryWeight x ≤ 2 ↔ ∃ j : ℕ, x = 2 ^ j + 1) := by
   have hw : binaryWeight x = 1 + binaryWeight (x / 2) := by
     rw [binaryWeight, Nat.digits_def' (by decide : 1 < 2) (by omega : 0 < x), ho, List.sum_cons]

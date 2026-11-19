@@ -1,4 +1,4 @@
-"""Reproduce the numerical checks for the fixed-cofactor results."""
+"""Reproduce the numerical checks for fixed cofactors and the small prime-power families."""
 from verify_erdos700_general import brute, cofactor_value, factor, large_prime_equal
 
 
@@ -57,6 +57,28 @@ def run_checks():
                 block_hits += 1
             checked_pairs += 1
     print(f"Fixed cofactors: {checked_pairs} (m, p) pairs, {block_hits} block certificates")
+
+    power_checks = 0
+    direct_power_checks = 0
+    for q in primes:
+        if q > 2000:
+            break
+        if q == 2:
+            continue
+        for e in range(1, 65):
+            expected = 3 if (q, e) == (3, 1) else 4
+            assert cofactor_value(4, q, e) == expected, (q, e)
+            if 4 * q**e <= 2500:
+                assert brute(4 * q**e) == expected, (q, e)
+                direct_power_checks += 1
+            power_checks += 1
+    for e in range(1, 513):
+        assert cofactor_value(6, 5, e) == 6, e
+        if 6 * 5**e <= 2500:
+            assert brute(6 * 5**e) == 6, e
+            direct_power_checks += 1
+        power_checks += 1
+    print(f"Small cofactors: {power_checks} prime powers, {direct_power_checks} direct row checks")
 
 
 if __name__ == "__main__":

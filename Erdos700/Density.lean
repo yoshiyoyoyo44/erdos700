@@ -5,16 +5,16 @@ import Mathlib.NumberTheory.Chebyshev
 
 namespace Erdos700
 
-private noncomputable def digitExponent (B : ℕ) : ℝ := Real.logb B ((B-1 : ℕ) : ℝ)
+noncomputable def digitExponent (B : ℕ) : ℝ := Real.logb B ((B-1 : ℕ) : ℝ)
 
-private theorem digitExponent_lt_one {B : ℕ} (hB : 1 < B) : digitExponent B < 1 := by
+theorem digitExponent_lt_one {B : ℕ} (hB : 1 < B) : digitExponent B < 1 := by
   have hb : (1 : ℝ) < B := by exact_mod_cast hB
   have ha : (0 : ℝ) < ((B-1 : ℕ) : ℝ) := by exact_mod_cast (by omega : 0 < B-1)
   have hlt : ((B-1 : ℕ) : ℝ) < B := by exact_mod_cast (by omega : B-1 < B)
   simpa [digitExponent, Real.logb_self_eq_one hb]
     using Real.logb_lt_logb hb ha hlt
 
-private theorem digit_count_le_rpow {B X : ℕ} (hB : 1 < B) (hX : 1 ≤ X) :
+theorem digit_count_le_rpow {B X : ℕ} (hB : 1 < B) (hX : 1 ≤ X) :
     (((B-1)^(Nat.log B X + 1) : ℕ) : ℝ) ≤ ((B-1 : ℕ) : ℝ) * (X:ℝ)^(digitExponent B) := by
   have hb : (1 : ℝ) < B := by exact_mod_cast hB
   have hb0 : (0 : ℝ) < B := by linarith

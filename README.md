@@ -31,7 +31,16 @@ lake exe cache get
 lake build
 ```
 
-$n=9\cdot2^e$ の公式と #406 との同値、$n=8p$ の分類、固定余因子で素数を動かす密度定理にもLeanの証明があります。元のPDFの定理2で扱う、素数 $q$ を固定して指数 $e$ を動かす密度評価と等差数列の構成は、PDFに手証明を収録しています。 [三進表示の証明](Erdos700/Families.lean) · [追加結果の数学的な説明](RESEARCH.md)
+ビルド済みの証明をLeanカーネルで再検査するには、対象のモジュールを指定できます。
+
+```sh
+lake env leanchecker Erdos700.AnswerSets
+lake env leanchecker Erdos700.ExponentDensity Erdos700.Progressions
+```
+
+元のPDFの定理2も形式証明しました。指数の上限を $E$ とすると、例外数は $C_{m,q}E^{1-\delta_m}$ 以下で、同じ $m$ に対するすべての素数 $q\nmid m$ に共通の $\delta_m>0$ が使えます。等号を与える一つの指数から無限等差数列を構成する定理、任意の剰余類にそのような数列が存在する定理、具体例 $f(4\cdot3^{2+16j})=4$ もすべての $j\ge0$ について検証しています。 [候補列の公式](Erdos700/PowerFamilies.lean) · [例外指数の密度](Erdos700/ExponentDensity.lean) · [無限等差数列](Erdos700/Progressions.lean)
+
+$n=9\cdot2^e$ の公式と #406 との同値、$n=8p$ の完全分類、および素数 $p$ を動かす密度定理の証明も収録しています。 [三進表示の証明](Erdos700/Families.lean) · [研究ノートと検証範囲](RESEARCH.md)
 
 ## 計算の再現
 

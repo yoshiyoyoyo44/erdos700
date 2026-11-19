@@ -4,12 +4,12 @@ import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 namespace Erdos700
 
 /-- Each base-B digit is chosen from 0,...,B-2, including padded leading zeros. -/
-private def missingDigitValues (B : ℕ) : ℕ → Finset ℕ
+def missingDigitValues (B : ℕ) : ℕ → Finset ℕ
   | 0 => {0}
   | r+1 => ((missingDigitValues B r) ×ˢ Finset.range (B-1)).image
       (fun qr => B * qr.1 + qr.2)
 
-private theorem card_missingDigitValues (B r : ℕ) :
+theorem card_missingDigitValues (B r : ℕ) :
     (missingDigitValues B r).card ≤ (B-1)^r := by
   induction r with
   | zero => simp [missingDigitValues]
@@ -19,7 +19,7 @@ private theorem card_missingDigitValues (B r : ℕ) :
       _ ≤ ((missingDigitValues B r) ×ˢ Finset.range (B-1)).card := Finset.card_image_le
       _ ≤ (B-1)^(r+1) := by simpa [pow_succ] using Nat.mul_le_mul_right (B-1) ih
 
-private theorem mem_missingDigitValues {B r x : ℕ} (hB : 1 < B) (hx : x < B^r)
+theorem mem_missingDigitValues {B r x : ℕ} (hB : 1 < B) (hx : x < B^r)
     (ha : ∀ i < r, x / B^i % B ≠ B-1) : x ∈ missingDigitValues B r := by
   induction r generalizing x with
   | zero => simp only [pow_zero, Nat.lt_one_iff] at hx; simp [hx, missingDigitValues]
@@ -60,25 +60,32 @@ theorem blockBase_gt_one {m ℓ : ℕ} (hm : 2 ≤ m) (hℓ : ℓ ∈ m.primeFac
   have ha := hp.factorization_pos_of_dvd hm0 hdiv
   exact one_lt_pow₀ hp.one_lt (by omega : Nat.clog ℓ m + m.factorization ℓ - 1 ≠ 0)
 
-private theorem equality_of_max_digits {m p : ℕ} (hm : 2 ≤ m) (hp : p.Prime) (hmp : m < p)
-    (hdigits : ∀ ℓ ∈ m.primeFactors, ∃ i : ℕ, p / (blockBase m ℓ)^i % blockBase m ℓ =
-      blockBase m ℓ - 1) : f (m*p) = m := by
-  apply fixed_cofactor_of_blocks hm hp hmp
-  intro ℓ hℓ
+/-- A maximal digit in the grouped base supplies the congruence for all required carries. -/
+theorem max_digit_witness {m ℓ x i : ℕ} (hm : 2 ≤ m) (hℓ : ℓ ∈ m.primeFactors)
+    (hi : x / (blockBase m ℓ)^i % blockBase m ℓ = blockBase m ℓ - 1) :
+    ∃ h d v : ℕ, 0 < h ∧ m ≤ ℓ^h ∧ 0 < v ∧ v ≤ ℓ^d ∧
+      ℓ^(d+h+m.factorization ℓ-1) ∣ x+v := by
   have hprime := (Nat.mem_primeFactors.mp hℓ).1
   let h := Nat.clog ℓ m
   let a := m.factorization ℓ
   let L := h+a-1
-  obtain ⟨i, hi⟩ := hdigits ℓ hℓ
   obtain ⟨v, hv, hvd, hdiv⟩ := block_of_max_digit (blockBase_gt_one hm hℓ) hi
   have hh : 0 < h := Nat.clog_pos hprime.one_lt (by omega)
   have hl : L+1 = h+a := by dsimp [L]; omega
   refine ⟨h, L*i, v, hh, Nat.le_pow_clog hprime.one_lt m, hv, ?_, ?_⟩
   · simpa only [blockBase, ← pow_mul] using hvd
-  · change ℓ^(L*i+h+a-1) ∣ p+v
-    change (ℓ^L)^(i+1) ∣ p+v at hdiv
+  · change ℓ^(L*i+h+a-1) ∣ x+v
+    change (ℓ^L)^(i+1) ∣ x+v at hdiv
     rw [← pow_mul, Nat.mul_add, Nat.mul_one] at hdiv
     rwa [show L*i+h+a-1 = L*i+L by omega]
+
+private theorem equality_of_max_digits {m p : ℕ} (hm : 2 ≤ m) (hp : p.Prime) (hmp : m < p)
+    (hdigits : ∀ ℓ ∈ m.primeFactors, ∃ i : ℕ, p / (blockBase m ℓ)^i % blockBase m ℓ =
+      blockBase m ℓ - 1) : f (m*p) = m := by
+  apply fixed_cofactor_of_blocks hm hp hmp
+  intro ℓ hℓ
+  obtain ⟨i, hi⟩ := hdigits ℓ hℓ
+  exact max_digit_witness hm hℓ hi
 
 /-- Number of primes p through X, with p > m, where f(mp) falls below m. -/
 def exceptionalPrimeCount (m X : ℕ) : ℕ :=
